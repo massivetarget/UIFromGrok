@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Journal Pro + Reports</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root { --bg:#f5f7fa; --card:#fff; --text:#2c3e50; --border:#ddd; --primary:#3498db; --success:#27ae60; --danger:#e74c3c; }
+  .dark { --bg:#121212; --card:#1e1e1e; --text:#e0e0e0; --border:#333; }
+  body { margin:0; padding:0; font-family:system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; transition:0.3s; }
+  .container { max-width:1100px; margin:0 auto; padding:1rem; }
+  h1 { text-align:center; margin:1rem 0; font-size:1.8rem; }
+  .tabs { display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap; }
+  .tab { padding:0.8rem 1.2rem; background:var(--card); border-radius:12px; cursor:pointer; font-weight:600; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+  .tab.active { background:var(--primary); color:white; }
+  .form-card, .report-card { background:var(--card); padding:1.2rem; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,0.1); margin-bottom:1rem; }
+  .header { display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; margin-bottom:1rem; }
+  @media(min-width:640px){ .header{grid-template-columns:auto 1fr 2fr;} }
+  .line { display:grid; grid-template-columns:2fr 1fr 1fr 50px; gap:0.6rem; padding:0.7rem; background:rgba(0,0,0,0.03); border-radius:10px; margin-bottom:0.6rem; }
+  @media(max-width:640px){ .line{grid-template-columns:1fr;} }
+  input,select{padding:0.75rem;border:2px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);width:100%;}
+  .add-btn,.post-btn,.export-btn{padding:0.9rem;border:none;border-radius:12px;cursor:pointer;width:100%;margin:0.8rem 0;font-weight:600;}
+  .add-btn{background:var(--primary);color:white;}
+  .post-btn{background:var(--success);color:white;}
+  .totals{display:flex;flex-wrap:wrap;gap:1rem;padding:0.8rem;background:rgba(0,0,0,0.05);border-radius:10px;font-weight:bold;}
+  .balanced{color:var(--success);}.unbalanced{color:var(--danger);}
+  table{width:100%;border-collapse:collapse;margin:1rem 0;}
+  th,td{border:1px solid var(--border);padding:0.8rem;text-align:left;}
+  th{background:var(--primary);color:white;}
+  tr:nth-child(even){background:rgba(0,0,0,0.03);}
+  .toggle-dark{position:fixed;bottom:20px;right:20px;width:56px;height:56px;background:var(--primary);color:white;border:none;border-radius:50%;font-size:1.5rem;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,0.2);z-index:1000;}
+  .report-controls{display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap;}
+  .report-controls select,.report-controls button{padding:0.7rem;border-radius:10px;}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Journal Pro + Financial Reports</h1>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('entry')">Journal Entry</div>
+    <div class="tab" onclick="showTab('trial')">Trial Balance</div>
+    <div class="tab" onclick="showTab('income')">Income Statement</div>
+    <div class="tab" onclick="showTab('balance')">Balance Sheet</div>
+    <div class="tab" onclick="showTab('ledger')">General Ledger</div>
+  </div>
+
+  <!-- Journal Entry Tab -->
+  <div id="entry" class="tab-content">
+    <div class="form-card">
+      <div class="header">
+        <div><label>Date</label><input type="date" id="entryDate" required></div>
+        <div><label>Ref</label><input type="text" id="reference"></div>
+        <div><label>Description</label><input type="text" id="description"></div>
+      </div>
+      <div id="lines"></div>
+      <button class="add-btn" onclick="addLine()">+ Add Line</button>
+      <div class="totals">
+        <span>Debit: <span id="totalDebit">0.00</span></span>
+        <span>Credit: <span id="totalCredit">0.00</span></span>
+        <span id="balanceStatus" class="unbalanced">Not balanced</span>
+      </div>
+      <button class="post-btn" onclick="postEntry()">Post Entry</button>
+    </div>
+  </div>
+
+  <!-- Reports -->
+  <div id="trial" class="tab-content" style="display:none;">
+    <div class="report-card">
+      <h2>Trial Balance</h2>
+      <div class="report-controls">
+        <input type="date" id="trialDate" onchange="renderTrialBalance()">
+        <button class="export-btn" onclick="exportReport('trial')">Export</button>
+      </div>
+      <div id="trialTable"></div>
+    </div>
+  </div>
+
+  <div id="income" class="tab-content" style="display:none;">
+    <div class="report-card">
+      <h2>Income Statement (P&L)</h2>
+      <div class="report-controls">
+        <input type="month" id="incomePeriod" value="2025-11" onchange="renderIncomeStatement()">
+        <button class="export-btn" onclick="exportReport('income')">Export</button>
+      </div>
+      <div id="incomeTable"></div>
+    </div>
+  </div>
+
+  <div id="balance" class="tab-content" style="display:none;">
+    <div class="report-card">
+      <h2>Balance Sheet</h2>
+      <div class="report-controls">
+        <input type="date" id="balanceDate" onchange="renderBalanceSheet()">
+        <button class="export-btn" onclick="exportReport('balance')">Export</button>
+      </div>
+      <div id="balanceTable"></div>
+    </div>
+  </div>
+
+  <div id="ledger" class="tab-content" style="display:none;">
+    <div class="report-card">
+      <h2>General Ledger</h2>
+      <div class="report-controls">
+        <select id="ledgerAccount" onchange="renderLedger()"><option>All Accounts</option></select>
+        <button class="export-btn" onclick="exportReport('ledger')">Export</button>
+      </div>
+      <div id="ledgerTable"></div>
+    </div>
+  </div>
+</div>
+
+<button class="toggle-dark" onclick="toggleDark()" id="darkBtn">Moon</button>
+
+<script>
+// Chart of Accounts with types
+const chartOfAccounts = {
+  "Assets": ["Cash","Bank","Accounts Receivable","Inventory","Prepaid Expenses","Property, Plant & Equipment"],
+  "Liabilities": ["Accounts Payable","Accrued Expenses","Loans Payable"],
+  "Equity": ["Capital","Drawings","Retained Earnings"],
+  "Revenue": ["Revenue","Sales Returns"],
+  "Expenses": ["Cost of Goods Sold","Salary Expense","Rent Expense","Utilities Expense","Interest Expense"]
+};
+const allAccounts = Object.values(chartOfAccounts).flat();
+
+let entries = JSON.parse(localStorage.getItem('journalEntries') || '[]');
+let lineCount = 0;
+
+// Dark mode
+function toggleDark() {
+  document.body.classList.toggle('dark');
+  const isDark = document.body.classList.contains('dark');
+  document.getElementById('darkBtn').innerHTML = isDark ? 'Sun' : 'Moon';
+  localStorage.setItem('darkMode', isDark);
+}
+if (localStorage.getItem('darkMode') === 'true') { document.body.classList.add('dark'); document.getElementById('darkBtn').innerHTML = 'Sun'; }
+
+// Tab system
+function showTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t=>t.style.display='none');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(tab).style.display = 'block';
+  document.querySelector(`.tab[onclick="showTab('${tab}')"]`).classList.add('active');
+  if (tab !== 'entry') renderReport(tab);
+}
+
+// Journal Entry Functions (same as before, slightly optimized)
+function addLine(acc='', deb='', cred='') {
+  lineCount++;
+  const div = document.createElement('div');
+  div.className = 'line'; div.id = 'line'+lineCount;
+  div.innerHTML = `
+    <select required onchange="updateBalance()">
+      ${allAccounts.map(a=>`<option ${a===acc?'selected':''}>${a}</option>`).join('')}
+    </select>
+    <input type="number" step="0.01" placeholder="Debit" value="${deb}" oninput="updateBalance();clearOther(this)">
+    <input type="number" step="0.01" placeholder="Credit" value="${cred}" oninput="updateBalance();clearOther(this)">
+    <button type="button" style="background:#e74c3c;color:white;border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;" onclick="removeLine(${lineCount})">×</button>
+  `;
+  document.getElementById('lines').appendChild(div);
+  updateBalance();
+}
+function clearOther(el) { if (el.value) el.parentElement.querySelectorAll('input[type=number]').forEach(i=>i!==el&&(i.value='')); }
+function removeLine(id) { document.getElementById('line'+id).remove(); updateBalance(); }
+function updateBalance() {
+  let deb = 0, cred = 0;
+  document.querySelectorAll('.line').forEach(l => {
+    deb += parseFloat(l.children[1].value)||0;
+    cred += parseFloat(l.children[2].value)||0;
+  });
+  document.getElementById('totalDebit').textContent = deb.toFixed(2);
+  document.getElementById('totalCredit').textContent = cred.toFixed(2);
+  const diff = Math.abs(deb-cred);
+  const s = document.getElementById('balanceStatus');
+  s.textContent = diff<0.01 ? 'Balanced' : `Unbalanced by ${diff.toFixed(2)}`;
+  s.className = diff<0.01 ? 'balanced' : 'unbalanced';
+}
+function postEntry() {
+  const date = document.getElementById('entryDate').value;
+  if (!date) return alert('Select date');
+  const lines = [];
+  let totalDeb = 0, totalCred = 0;
+  document.querySelectorAll('.line').forEach(l => {
+    const acc = l.children[0].value;
+    const deb = parseFloat(l.children[1].value)||0;
+    const cred = parseFloat(l.children[2].value)||0;
+    if (deb||cred) { lines.push({account:acc,debit:deb,credit:cred}); totalDeb+=deb; totalCred+=cred; }
+  });
+  if (lines.length<2 || Math.abs(totalDeb-totalCred)>=0.01) return alert('Must have ≥2 lines and be balanced');
+  const entry = {id:Date.now(), date, ref:document.getElementById('reference').value.trim()||'—', desc:document.getElementById('description').value.trim()||'—', lines};
+  entries.unshift(entry);
+  localStorage.setItem('journalEntries', JSON.stringify(entries));
+  alert('Entry posted!');
+  document.getElementById('lines').innerHTML=''; addLine(); addLine();
+  document.getElementById('reference').value=''; document.getElementById('description').value='';
+  document.getElementById('entryDate').valueAsDate = new Date();
+}
+
+// Reporting Engine
+function getAccountType(acc) {
+  for (const [type, list] of Object.entries(chartOfAccounts)) {
+    if (list.includes(acc)) return type;
+  }
+  return "Expenses";
+}
+
+function calculateBalances(upToDate = null) {
+  const balances = {};
+  allAccounts.forEach(acc => balances[acc] = {debit:0, credit:0, balance:0});
+
+  entries
+    .filter(e => !upToDate || e.date <= upToDate)
+    .forEach(entry => {
+      entry.lines.forEach(line => {
+        balances[line.account].debit += line.debit;
+        balances[line.account].credit += line.credit;
+      });
+    });
+
+  allAccounts.forEach(acc => {
+    const type = getAccountType(acc);
+    let bal = balances[acc].debit - balances[acc].credit;
+    if (["Liabilities","Equity","Revenue"].includes(type)) bal = -bal;
+    balances[acc].balance = bal;
+  });
+  return balances;
+}
+
+// Render Reports
+function renderReport(type) {
+  if (type === 'trial') renderTrialBalance();
+  if (type === 'income') renderIncomeStatement();
+  if (type === 'balance') renderBalanceSheet();
+  if (type === 'ledger') renderLedger();
+}
+
+function renderTrialBalance() {
+  const date = document.getElementById('trialDate').value || new Date().toISOString().split('T')[0];
+  document.getElementById('trialDate').value = date;
+  const bal = calculateBalances(date);
+  let html = `<table><tr><th>Account</th><th>Debit</th><th>Credit</th></tr>`;
+  let totalDeb = 0, totalCred = 0;
+  allAccounts.forEach(acc => {
+    const b = bal[acc];
+    if (b.balance !== 0 || b.debit > 0 || b.credit > 0) {
+      const deb = b.balance > 0 ? b.balance : 0;
+      const cred = b.balance < 0 ? -b.balance : 0;
+      html += `<tr><td>${acc}</td><td>${deb.toFixed(2)}</td><td>${cred.toFixed(2)}</td></tr>`;
+      totalDeb += deb; totalCred += cred;
+    }
+  });
+  html += `<tr><th>Total</th><th>${totalDeb.toFixed(2)}</th><th>${totalCred.toFixed(2)}</th></tr></table>`;
+  document.getElementById('trialTable').innerHTML = html;
+}
+
+function renderIncomeStatement() {
+  const period = document.getElementById('incomePeriod').value;
+  const [year, month] = period.split('-');
+  const start = `${year}-${month}-01`;
+  const end = new Date(year, month, 0).toISOString().split('T')[0];
+  const bal = calculateBalances(end);
+
+  let revenue = 0, expenses = 0;
+  let html = `<table><tr><th colspan="2">Income Statement - ${period}</th></tr>`;
+
+  // Revenue
+  chartOfAccounts.Revenue.forEach(acc => {
+    const b = bal[acc].balance;
+    if (b !== 0) { revenue += b; html += `<tr><td>${acc}</td><td style="text-align:right;">${b.toFixed(2)}</td></tr>`; }
+  });
+  html += `<tr><td><strong>Total Revenue</strong></td><td style="text-align:right;"><strong>${revenue.toFixed(2)}</strong></td></tr><tr><td colspan="2"><hr></td></tr>`;
+
+  // Expenses
+  chartOfAccounts.Expenses.forEach(acc => {
+    const b = bal[acc].balance;
+    if (b !== 0) { expenses += b; html += `<tr><td>${acc}</td><td style="text-align:right;">${b.toFixed(2)}</td></tr>`; }
+  });
+  html += `<tr><td><strong>Total Expenses</strong></td><td style="text-align:right;"><strong>${expenses.toFixed(2)}</strong></td></tr>`;
+  const profit = revenue - expenses;
+  html += `<tr><td><strong>Net Profit</strong></td><td style="text-align:right;color:${profit>=0?'green':'red'};"><strong>${profit.toFixed(2)}</strong></td></tr></table>`;
+  document.getElementById('incomeTable').innerHTML = html;
+}
+
+function renderBalanceSheet() {
+  const date = document.getElementById('balanceDate').value || new Date().toISOString().split('T')[0];
+  document.getElementById('balanceDate').value = date;
+  const bal = calculateBalances(date);
+
+  let assets = 0, liabilities = 0, equity = 0;
+  let html = `<table><tr><th colspan="2">Balance Sheet as of ${date}</th></tr>`;
+
+  // Assets
+  html += `<tr><td colspan="2"><strong>ASSETS</strong></td></tr>`;
+  chartOfAccounts.Assets.forEach(acc => {
+    const b = bal[acc].balance;
+    if (b !== 0) { assets += b; html += `<tr><td>${acc}</td><td style="text-align:right;">${b.toFixed(2)}</td></tr>`; }
+  });
+  html += `<tr><td><strong>Total Assets</strong></td><td style="text-align:right;"><strong>${assets.toFixed(2)}</strong></td></tr><tr><td colspan="2">&nbsp;</td></tr>`;
+
+  // Liabilities & Equity
+  html += `<tr><td colspan="2"><strong>LIABILITIES & EQUITY</strong></td></tr>`;
+  chartOfAccounts.Liabilities.forEach(acc => {
+    const b = bal[acc].balance;
+    if (b !== 0) { liabilities += b; html += `<tr><td>${acc}</td><td style="text-align:right;">${b.toFixed(2)}</td></tr>`; }
+  });
+  chartOfAccounts.Equity.forEach(acc => {
+    const b = bal[acc].balance;
+    if (b !== 0) { equity += b; html += `<tr><td>${acc}</td><td style="text-align:right;">${b.toFixed(2)}</td></tr>`; }
+  });
+  const totalLE = liabilities + equity;
+  html += `<tr><td><strong>Total Liabilities & Equity</strong></td><td style="text-align:right;"><strong>${totalLE.toFixed(2)}</strong></td></tr></table>`;
+  document.getElementById('balanceTable').innerHTML = html;
+}
+
+function renderLedger() {
+  const select = document.getElementById('ledgerAccount');
+  if (select.children.length === 1) {
+    allAccounts.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a; opt.textContent = a;
+      select.appendChild(opt);
+    });
+  }
+  const acc = select.value;
+  let html = `<table><tr><th>Date</th><th>Ref</th><th>Description</th><th>Debit</th><th>Credit</th><th>Balance</th></tr>`;
+  let balance = 0;
+  entries
+    .sort((a,b)=>a.date.localeCompare(b.date))
+    .forEach(e => {
+      e.lines.forEach(l => {
+        if (!acc || l.account === acc) {
+          const type = getAccountType(l.account);
+          balance += (type==="Assets"||type==="Expenses") ? l.debit - l.credit : l.credit - l.debit;
+          html += `<tr><td>${e.date}</td><td>${e.ref}</td><td>${e.desc}</td><td>${l.debit.toFixed(2)}</td><td>${l.credit.toFixed(2)}</td><td><strong>${balance.toFixed(2)}</strong></td></tr>`;
+        }
+      });
+    });
+  html += `</table>`;
+  document.getElementById('ledgerTable').innerHTML = html;
+}
+
+// Export any report
+function exportReport(type) {
+  const titles = {trial:"Trial Balance", income:"Income Statement", balance:"Balance Sheet", ledger:"General Ledger"};
+  const win = window.open('','_blank');
+  win.document.write(`<html><head><title>${titles[type]}</title><style>table{border-collapse:collapse;width:100%;}th,td{border:1px solid #000;padding:8px;}</style></head><body>`);
+  win.document.write(document.querySelector(`#${type}Table` || `#${type}Table`).innerHTML);
+  win.document.write('</body></html>');
+  win.document.close();
+  win.print();
+}
+
+// Init
+addLine(); addLine();
+document.getElementById('entryDate').valueAsDate = new Date();
+document.getElementById('trialDate').valueAsDate = new Date();
+document.getElementById('balanceDate').valueAsDate = new Date();
+</script>
+</body>
+</html>

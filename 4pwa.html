@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>J</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkpvdXJuYWwgUHJvIiwKICAic2hvcnRfbmFtZSI6ICJKIiwKICAiZGVzY3JpcHRpb24iOiAiRG91YmxlLWVudHJ5IEpvdXJuYWwgUHJvIiwKICAic3RhcnRfdXJsIjogIi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmOGY5ZmMiLAogICJ0aGVtZV9jb2xvciI6ICIjNDM2MWVlIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9wbmc7YmFzZTY0LGlWQk9SME1EUXlNREUxTXpReU5nPT0iLAogICAgICAic2l6ZXMiOiAiMTkyeDE5MiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIKICAgIH0KICBdLAogICJwbGF0Zm9ybSI6IHsKICAgICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICAgImxhbmd1YWdlIjogImVuIiwKICAgICJkaXJlY3Rfb3JpZ250YXRpb24iOiAicG9ydHJhaXQiCiAgfSwKICAic2NvcGUiOiAiLyIsCiAgInN0YXR1cyI6ICJzdGFuZGFsb25lIiwKICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiLAogICJkaXNwbGF5X292ZXJyaWRlIjogInN0YW5kYWxvbmUiLAogICJzdGFydF91cmwiOiAiLi8iLAogICJwbGF0Zm9ybSI6IHsKICAgICJ3ZWJfYXBwX21hbmFmZXI6IjogbnVsbAogIH0KfQ==">
+<meta name="theme-color" content="#4361ee">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Journal Pro">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBOR0M DQUxMI... [base64 for 192x192 icon - use a simple icon generator]">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100dvh;overflow:hidden;font-family:system-ui,sans-serif;background:var(--bg);color:var(--t)}
+:root{--bg:#f8f9fc;--c:#fff;--t:#1e293b;--b:#e2e8f0;--p:#4361ee;--g:#10b981;--r:#ef4444;--v:#8b5cf6}
+.dark{--bg:#0f172a;--c:#1e293b;--t:#e2e8f0;--b:#334155}
+body{display:flex;flex-direction:column}
+h1{font-size:1.4rem;text-align:center;padding:0.4rem 0;background:var(--p);color:#fff;margin:0}
+main{flex:1;overflow-y:auto;padding:0.5rem 0.6rem;padding-bottom:80px}
+.card{background:var(--c);border-radius:12px;padding:0.7rem;margin-bottom:0.7rem;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.hdr{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem}
+@media(min-width:440px){.hdr{grid-template-columns:auto 1fr 2fr}}
+label{font-size:0.8rem;font-weight:600}
+input,select{width:100%;padding:0.6rem;border:1.5px solid var(--b);border-radius:8px;font-size:0.95rem;background:var(--c);color:var(--t)}
+.line{display:grid;grid-template-columns:2fr 1fr 1fr 34px;gap:0.4rem;padding:0.5rem;background:rgba(0,0,0,0.04);border-radius:8px;margin:0.4rem 0;align-items:center}
+@media(max-width:420px){.line{grid-template-columns:1fr}}
+.x{width:34px;height:34px;border-radius:50%;background:var(--r);color:#fff;border:none;font-size:1.2rem}
+.btn{display:block;width:100%;padding:0.75rem;margin:0.5rem 0;border:none;border-radius:10px;font-weight:600;color:#fff;cursor:pointer}
+.add{background:var(--p)}
+.post{background:var(--g)}
+.tot{display:flex;gap:0.8rem;padding:0.5rem;background:rgba(0,0,0,0.06);border-radius:8px;font-size:0.9rem;font-weight:bold}
+.ok{color:var(--g)}.no{color:var(--r)}
+.e{background:var(--c);padding:0.6rem;border-radius:10px;margin:0.4rem 0;position:relative;overflow:hidden}
+.eh{font-weight:600;font-size:0.9rem;display:flex;justify-content:space-between}
+.ed{font-size:0.78rem;margin:0.3rem 0;opacity:0.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ea{display:flex;gap:0.4rem;margin-top:0.4rem}
+.eb{padding:0.4rem 0.7rem;background:var(--v);color:#fff;border:none;border-radius:6px;font-size:0.8rem}
+.del{position:absolute;top:0;left:0;right:0;bottom:0;background:var(--r);color:#fff;display:flex;align-items:center;justify-content:flex-end;padding-right:1.5rem;font-weight:bold;transform:translateX(100%);transition:.3s}
+.e.s .del{transform:translateX(-70px)}
+.fab{position:fixed;bottom:16px;right:16px;width:52px;height:52px;border-radius:50%;background:var(--p);color:#fff;border:none;font-size:1.5rem;box-shadow:0 4px 16px rgba(0,0,0,0.3);z-index:10}
+#install-banner{display:none;position:fixed;top:0;left:0;right:0;background:#4361ee;color:#fff;text-align:center;padding:0.8rem;z-index:1000;font-size:0.9rem}
+#install-banner button{background:#fff;color:#4361ee;border:none;padding:0.4rem 0.8rem;border-radius:4px;margin-left:1rem;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Journal</h1>
+<div id="install-banner">
+  Install for offline use? <button onclick="installPWA()">Install</button> <button onclick="closeBanner()">Close</button>
+</div>
+<main id="app">
+  <div class="card">
+    <div class="hdr">
+      <div><label>Date</label><input type="date" id="d" required></div>
+      <div><label>Ref</label><input type="text" id="r" placeholder="001"></div>
+      <div><label>Desc</label><input type="text" id="n"></div>
+    </div>
+    <div id="l"></div>
+    <button class="btn add" onclick="add()">+ Line</button>
+    <div class="tot">
+      <span>Dr <span id="dr">0</span></span>
+      <span>Cr <span id="cr">0</span></span>
+      <span id="st" class="no">No</span>
+    </div>
+    <button class="btn post" onclick="save()">Post</button>
+  </div>
+  <div id="list"></div>
+</main>
+<button class="fab" onclick="t()">Toggle</button>
+
+<script>
+// Service Worker for offline
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('data:application/javascript;base64,W29iamVjdCB7fV0KZnVuY3Rpb24gY2FjaGVuYW1lKCkgeyByZXR1cm4gJ3B3YS1jYWNoZS12MSc7IH0KCmZ1bmN0aW9uIHJlZ2lzdGVyU3dBdXRoKGluc3RhbmNlKSB7CiAgaW5zdGFuY2UuYWRkRXZlbnRMaXN0ZW5lcignYWN0aXZhdGlvbicsIGZ1bmN0aW9uKGV2ZW50KSB7CiAgICBldmVudC53YWl0VW50aWwoKTsKICAgIHZhciBjYWNoZXM9W107CiAgICBldmVudC53YWl0VW50aWwoKCk7CiAgICByZXR1cm4gY2FjaGVzOwogIH0pOwp9CgpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoJ2luc3RhbGwnLCBmdW5jdGlvbihldmVudCkgewogIHZhciByZXNwb25zZXM7CiAgdmFyIGNhY2hlID0gZ2V0Q2FjaGVuYW1lKCk7CiAgZXZlbnQud2FpdFVudGlsKHJlc3BvbnNlcyA9PiB7CiAgICByZXR1cm4gY2FjaGVzLnBlbmRmb3IoKCkgPT4gewogICAgICByZXR1cm4gY2FjaGVzLmFkZChhbGwoJy8nKSk7CiAgICAgIHJldHVybiByZXNwb25zZXM7CiAgICB9KTsKICB9KTsKICBldmVudC5yZXNwb25kV2l0aChyZXNwb25zZXMpOwp9KTsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIGZ1bmN0aW9uKGV2ZW50KSB7CiAgdmFyIHJlc3BvbnNlOwogIGlmICghKGV2ZW50LnJlcXVlc3QudXJsLm1hdGNoKClcKSB7CiAgICByZXR1cm4gZXZlbnQucmVzcG9uZHdpdGgoZmV0Y2goZXZlbnQucmVxdWVzdCk7CiAgfQoKICBldmVudC5yZXNwb25kV2l0aChyZXNwb25zZSk7Cn0pOw==').then(reg => console.log('SW registered')).catch(err => console.log('SW failed'));
+}
+
+// PWA Install
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-banner').style.display = 'block';
+});
+function installPWA() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') console.log('Installed');
+      deferredPrompt = null;
+    });
+  }
+  closeBanner();
+}
+function closeBanner() {
+  document.getElementById('install-banner').style.display = 'none';
+}
+
+// Core App (same as before, minified)
+const a=["Cash","Bank","A/R","Inventory","A/P","Revenue","Salary","Rent","Capital","Drawings"].sort();
+let e=JSON.parse(localStorage.getItem('j')||'[]');
+function t(){document.body.classList.toggle('dark');localStorage.setItem('dark',document.body.classList.contains('dark'))}
+if(localStorage.getItem('dark')==='true')document.body.classList.add('dark');
+function add(acc='',dr='',cr=''){const d=document.createElement('div');d.className='line';d.innerHTML=`<select required>${a.map(x=>`<option ${x===acc?'selected':''}>${x}</option>`).join('')}</select><input type="number" step="0.01" placeholder="Dr" value="${dr}" oninput="up();c(this)"><input type="number" step="0.01" placeholder="Cr" value="${cr}" oninput="up();c(this)"><button class="x" onclick="this.parentElement.remove();up()">X</button>`;document.getElementById('l').appendChild(d);up();}
+function c(el){if(el.value)el.parentElement.querySelectorAll('input[type=number]').forEach(i=>i!==el&&(i.value=''))}
+function up(){let D=0,C=0;document.querySelectorAll('.line').forEach(l=>{D+=+l.children[1].value||0;C+=+l.children[2].value||0});document.getElementById('dr').textContent=D.toFixed(2);document.getElementById('cr').textContent=C.toFixed(2);const s=document.getElementById('st'),diff=Math.abs(D-C);s.textContent=diff<0.01?'OK':'No';s.className=diff<0.01?'ok':'no';}
+function save(){const date=document.getElementById('d').value;if(!date)return alert('Date');const lines=[],td=0,tc=0;document.querySelectorAll('.line').forEach(l=>{const ac=l.children[0].value,dr=+l.children[1].value||0,cr=+l.children[2].value||0;if(dr+cr>0){lines.push({ac,debit:dr,credit:cr});td+=dr;tc+=cr}});if(lines.length<2||Math.abs(td-tc)>=0.01)return alert('Balance');e.unshift({id:Date.now(),date,ref:document.getElementById('r').value.trim()||'—',n:document.getElementById('n').value.trim()||'—',lines});localStorage.setItem('j',JSON.stringify(e));document.getElementById('l').innerHTML='';add();add();document.getElementById('r').value='';document.getElementById('n').value='';document.getElementById('d').valueAsDate=new Date();list();alert('Saved');}
+function list(){const c=document.getElementById('list');c.innerHTML=e.map(x=>`<div class="e" ontouchstart="s(event)" onmousedown="s(event)"><div class="eh"><div>${x.date} ${x.ref}</div><div>${x.n}</div></div><div class="ed">${x.lines.map(l=>`${l.ac} ${l.debit?'Dr'+l.debit:'Cr'+l.credit}`).join(' • ')}</div><div class="ea"><button class="eb" onclick="event.stopPropagation();csv(${x.id})">CSV</button><button class="eb" onclick="event.stopPropagation();pdf(${x.id})">PDF</button></div><div class="del" onclick="event.stopPropagation();del(${x.id})">Delete</div></div>`).join('');}
+function del(id){if(confirm('Delete?')){e=e.filter(x=>x.id!==id);localStorage.setItem('j',JSON.stringify(e));list();}}
+let sx=0;function s(ev){const el=ev.currentTarget;sx=ev.touches?ev.touches[0].clientX:ev.clientX;const m=e=>{const x=e.touches?e.touches[0].clientX:e.clientX;if(sx-x>30)el.classList.add('s');else el.classList.remove('s')};const end=()=>{if(sx-(e.changedTouches?.[0]?.clientX||e.clientX)>80)el.querySelector('.del').click();el.classList.remove('s');document.removeEventListener('mousemove',m);document.removeEventListener('touchmove',m);document.removeEventListener('mouseup',end);document.removeEventListener('touchend',end);};document.addEventListener('mousemove',m);document.addEventListener('touchmove',m);document.addEventListener('mouseup',end);document.addEventListener('touchend',end);}
+function csv(id){const x=e.find(i=>i.id===id);let t="Date,Ref,Account,Dr,Cr,Desc\n";x.lines.forEach(l=>t+=`${x.date},${x.ref},${l.ac},${l.debit||''},${l.credit||''},${x.n}\n`);dl(t,`j${id}.csv`);}
+function pdf(id){const x=e.find(i=>i.id===id);const w=window.open('','_blank');w.document.write(`<html><head><title>${x.date}</title><style>body{font-family:Arial;margin:2cm}table{border-collapse:collapse;width:100%}th,td{border:1px solid #000;padding:8px}th{background:#f0f0f0}</style></head><body><h2>Entry ${x.date}</h2><p>Ref: ${x.ref} | Desc: ${x.n}</p><table><tr><th>Account</th><th>Dr</th><th>Cr</th></tr>${x.lines.map(l=>`<tr><td>${l.ac}</td><td>${(l.debit||0).toFixed(2)}</td><td>${(l.credit||0).toFixed(2)}</td></tr>`).join('')}<tr><td><b>Total</b></td><td><b>${x.lines.reduce((s,l)=>(s+(l.debit||0)),0).toFixed(2)}</b></td><td><b>${x.lines.reduce((s,l)=>(s+(l.credit||0)),0).toFixed(2)}</b></td></tr></table></body></html>`);w.document.close();setTimeout(()=>w.print(),500);}
+function dl(c,n){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:'text/csv'}));a.download=n;a.click();}
+add();add();document.getElementById('d').valueAsDate=new Date();list();
+</script>
+</body>
+</html>

@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Journal Pro</title>
+
+    <!-- Local Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- PWA manifest -->
+     <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4361ee">
+    <link rel="icon" type="image/png" href="/icons/icon-192.png">
+
+    <!-- <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#4361ee" /> -->
+
+    <!-- iOS meta -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Journal Pro" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <style>
+      :root {
+        --bg: #f5f7fa;
+        --card: #ffffff;
+        --text: #2c3e50;
+        --border: #dddddd;
+        --primary: #3498db;
+        --success: #27ae60;
+        --danger: #e74c3c;
+      }
+      .dark {
+        --bg: #121212;
+        --card: #1e1e1e;
+        --text: #e0e0e0;
+        --border: #333333;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        transition: background 0.3s;
+      }
+      h1 {
+        text-align: center;
+        margin: 1rem 0;
+        font-size: 1.6rem;
+      }
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0.5rem;
+      }
+      .form-card {
+        background: var(--card);
+        padding: 1.2rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+        transition: all 0.3s;
+      }
+      .header {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem;
+        margin-bottom: 1rem;
+      }
+      @media (min-width: 640px) {
+        .header {
+          grid-template-columns: auto 1fr 2fr;
+        }
+      }
+      label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 0.3rem;
+        display: block;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        font-size: 1rem;
+        background: var(--card);
+        color: var(--text);
+      }
+      .line {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 50px;
+        gap: 0.6rem;
+        align-items: center;
+        padding: 0.7rem;
+        background: rgba(0, 0, 0, 0.03);
+        border-radius: 10px;
+        margin-bottom: 0.6rem;
+        transition: 0.3s;
+      }
+      @media (max-width: 640px) {
+        .line {
+          grid-template-columns: 1fr;
+        }
+        .line button {
+          width: 50px;
+          margin: 0.5rem auto 0;
+        }
+      }
+      .remove-btn {
+        background: var(--danger);
+        color: #ffffff;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 1.3rem;
+        cursor: pointer;
+      }
+      .add-btn,
+      .post-btn,
+      .export-btn {
+        padding: 0.9rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        margin: 0.8rem 0;
+        font-size: 1rem;
+      }
+      .add-btn {
+        background: var(--primary);
+        color: #ffffff;
+      }
+      .post-btn {
+        background: var(--success);
+        color: #ffffff;
+      }
+      .totals {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        padding: 0.8rem;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 10px;
+        font-weight: bold;
+      }
+      .balanced {
+        color: var(--success);
+      }
+      .unbalanced {
+        color: var(--danger);
+      }
+      .entries-list {
+        margin-top: 2rem;
+      }
+      .entry-item {
+        background: var(--card);
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 0.8rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        position: relative;
+        overflow: hidden;
+        user-select: none;
+      }
+      .entry-header {
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+      }
+      .entry-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+      .export-btn {
+        background: #9b59b6;
+        color: #ffffff;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+      .toggle-dark {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 56px;
+        height: 56px;
+        background: var(--primary);
+        color: #ffffff;
+        border: none;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+      }
+      .install-banner {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: #27ae60;
+        color: #ffffff;
+        text-align: center;
+        padding: 0.8rem;
+        z-index: 1000;
+        font-size: 0.9rem;
+      }
+      .install-banner button {
+        background: #ffffff;
+        color: #27ae60;
+        border: none;
+        padding: 0.4rem 0.8rem;
+        border-radius: 4px;
+        margin-left: 1rem;
+        cursor: pointer;
+      }
+      .swipe-delete {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--danger);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-right: 2rem;
+        font-weight: bold;
+        transform: translateX(100%);
+        transition: 0.4s;
+      }
+      .entry-item.swiping .swipe-delete {
+        transform: translateX(0);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="install-banner" class="install-banner">
+      Install Journal Pro for offline use?
+      <button onclick="installPWA()">Install</button>
+      <button onclick="closeBanner()">Close</button>
+    </div>
+
+    <div class="container">
+      <h1><i class="fas fa-book"></i> Journal Pro</h1>
+
+      <div class="form-card">
+        <div class="header">
+          <div>
+            <label for="entryDate">Date</label>
+            <input type="date" id="entryDate" required />
+          </div>
+          <div>
+            <label for="reference">Ref</label>
+            <input type="text" id="reference" placeholder="INV-001" />
+          </div>
+          <div>
+            <label for="description">Description</label>
+            <input
+              type="text"
+              id="description"
+              placeholder="Payment received..."
+            />
+          </div>
+        </div>
+
+        <div id="lines"></div>
+
+        <button class="add-btn" onclick="addLine()">Add Line</button>
+
+        <div class="totals">
+          <span>Debit: <span id="totalDebit">0.00</span></span>
+          <span>Credit: <span id="totalCredit">0.00</span></span>
+          <span id="balanceStatus" class="unbalanced">Not balanced</span>
+        </div>
+
+        <button class="post-btn" onclick="postEntry()">
+          Post Journal Entry
+        </button>
+      </div>
+
+      <div id="savedEntries" class="entries-list"></div>
+    </div>
+
+    <button class="toggle-dark" id="darkBtn" onclick="toggleDark()">
+      🌙
+    </button>
+
+    <script>
+      // Service worker
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("./sw.js")
+          .then(() => console.log("SW registered"))
+          .catch((err) => console.log("SW failed", err));
+      }
+
+      // PWA install
+      let deferredPrompt = null;
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById("install-banner").style.display = "block";
+      });
+
+      function installPWA() {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choice) => {
+          if (choice.outcome === "accepted") {
+            console.log("PWA installed");
+          }
+          deferredPrompt = null;
+          closeBanner();
+        });
+      }
+
+      function closeBanner() {
+        document.getElementById("install-banner").style.display = "none";
+      }
+
+      // App code (simplified from your original)
+      const accounts = [
+        "Cash",
+        "Bank",
+        "Accounts Receivable",
+        "Inventory",
+        "Accounts Payable",
+        "Revenue",
+        "Salary Expense",
+        "Rent Expense",
+        "Capital",
+        "Drawings",
+      ].sort();
+
+      let entries = JSON.parse(localStorage.getItem("journalEntries") || "[]");
+
+      function toggleDark() {
+        document.body.classList.toggle("dark");
+        const isDark = document.body.classList.contains("dark");
+        localStorage.setItem("darkMode", isDark);
+      }
+
+      if (localStorage.getItem("darkMode") === "true") {
+        document.body.classList.add("dark");
+      }
+
+      function addLine(account = "", debit = "", credit = "") {
+        const div = document.createElement("div");
+        div.className = "line";
+        div.innerHTML = `
+          <div>
+            <label>Account</label>
+            <select required>
+              ${accounts
+                .map(
+                  (a) =>
+                    `<option value="${a}" ${
+                      a === account ? "selected" : ""
+                    }>${a}</option>`
+                )
+                .join("")}
+            </select>
+          </div>
+          <div>
+            <label>Debit</label>
+            <input type="number" step="0.01" placeholder="Debit" value="${debit}"
+              oninput="updateBalance(); clearOther(this)" />
+          </div>
+          <div>
+            <label>Credit</label>
+            <input type="number" step="0.01" placeholder="Credit" value="${credit}"
+              oninput="updateBalance(); clearOther(this)" />
+          </div>
+          <button type="button" class="remove-btn" onclick="this.parentElement.remove(); updateBalance()">×</button>
+        `;
+        document.getElementById("lines").appendChild(div);
+      }
+
+      function clearOther(input) {
+        if (!input.value) return;
+        const inputs = input
+          .closest(".line")
+          .querySelectorAll('input[type="number"]');
+        inputs.forEach((i) => {
+          if (i !== input) i.value = "";
+        });
+      }
+
+      function updateBalance() {
+        let totalDebit = 0,
+          totalCredit = 0;
+        document.querySelectorAll(".line").forEach((line) => {
+          const deb = parseFloat(
+            line.querySelectorAll('input[type="number"]')[0].value || "0"
+          );
+          const cred = parseFloat(
+            line.querySelectorAll('input[type="number"]')[1].value || "0"
+          );
+          totalDebit += deb;
+          totalCredit += cred;
+        });
+        document.getElementById("totalDebit").textContent =
+          totalDebit.toFixed(2);
+        document.getElementById("totalCredit").textContent =
+          totalCredit.toFixed(2);
+        const diff = Math.abs(totalDebit - totalCredit);
+        const status = document.getElementById("balanceStatus");
+        if (diff < 0.01) {
+          status.textContent = "Balanced";
+          status.className = "balanced";
+        } else {
+          status.textContent = `Unbalanced by ${diff.toFixed(2)}`;
+          status.className = "unbalanced";
+        }
+      }
+
+      function postEntry() {
+        const date = document.getElementById("entryDate").value;
+        if (!date) return alert("Please select a date");
+        const lines = [];
+        let totalDebit = 0,
+          totalCredit = 0;
+        document.querySelectorAll(".line").forEach((line) => {
+          const account = line.querySelector("select").value;
+          const deb = parseFloat(
+            line.querySelectorAll('input[type="number"]')[0].value || "0"
+          );
+          const cred = parseFloat(
+            line.querySelectorAll('input[type="number"]')[1].value || "0"
+          );
+          if (deb !== 0 || cred !== 0) {
+            lines.push({ account, debit: deb, credit: cred });
+            totalDebit += deb;
+            totalCredit += cred;
+          }
+        });
+        if (lines.length < 2) return alert("Need at least 2 lines");
+        if (Math.abs(totalDebit - totalCredit) >= 0.01)
+          return alert("Entry must balance!");
+
+        const entry = {
+          id: Date.now(),
+          date,
+          ref: document.getElementById("reference").value.trim(),
+          desc: document.getElementById("description").value.trim(),
+          lines,
+        };
+        entries.unshift(entry);
+        localStorage.setItem("journalEntries", JSON.stringify(entries));
+        renderEntries();
+        document.getElementById("lines").innerHTML = "";
+        addLine();
+        addLine();
+        document.getElementById("reference").value = "";
+        document.getElementById("description").value = "";
+        document.getElementById("entryDate").valueAsDate = new Date();
+        alert("Journal entry saved!");
+      }
+
+      function renderEntries() {
+        const container = document.getElementById("savedEntries");
+        if (!entries.length) {
+          container.innerHTML =
+            '<p style="text-align:center;color:#888;margin:2rem 0">No entries yet</p>';
+          return;
+        }
+        container.innerHTML = entries
+          .map(
+            (e) => `
+          <div class="entry-item">
+            <div class="entry-header">
+              <div>${e.date} – ${e.ref || "No ref"}</div>
+              <div>${e.desc || ""}</div>
+            </div>
+            <div style="font-size:0.9rem;margin:0.5rem 0;opacity:0.8">
+              ${e.lines
+                .map(
+                  (l) =>
+                    `${l.account}: ${
+                      l.debit ? "Dr " + l.debit.toFixed(2) : ""
+                    }${l.credit ? " Cr " + l.credit.toFixed(2) : ""}`
+                )
+                .join("<br />")}
+            </div>
+          </div>
+        `
+          )
+          .join("");
+      }
+
+      // init
+      addLine();
+      addLine();
+      document.getElementById("entryDate").valueAsDate = new Date();
+      renderEntries();
+    </script>
+  </body>
+</html>

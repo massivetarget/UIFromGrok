@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Journal Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- PWA: theme color -->
+  <meta name="theme-color" content="#0f172a">
+
+  <!-- PWA: manifest -->
+  <link rel="manifest" href="/manifest.webmanifest">
+
+  <!-- Icons (adjust paths/filenames as per your project) -->
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png">
+  <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #020617;
+      color: #e5e7eb;
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 960px;
+      background: radial-gradient(circle at top, #1e293b, #020617 60%);
+      border-radius: 24px;
+      border: 1px solid #1f2937;
+      box-shadow:
+        0 20px 60px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(148, 163, 184, 0.06);
+      display: flex;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 260px;
+      padding: 20px 18px;
+      border-right: 1px solid rgba(148, 163, 184, 0.2);
+      background: linear-gradient(180deg, rgba(15,23,42,0.95), rgba(15,23,42,0.96));
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 12px;
+      background: radial-gradient(circle at 30% 20%, #38bdf8, #0ea5e9 40%, #0369a1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 0 0 1px rgba(191, 219, 254, 0.3),
+        0 8px 20px rgba(59, 130, 246, 0.5);
+      font-size: 16px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .logo-text-main {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .logo-text-sub {
+      font-size: 10px;
+      color: #9ca3af;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .today-date {
+      font-size: 12px;
+      color: #9ca3af;
+      display: flex;
+      justify-content: space-between;
+      border-radius: 10px;
+      padding: 8px 10px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: linear-gradient(135deg, rgba(15,23,42,0.9), rgba(30,64,175,0.55));
+      color: #e5e7eb;
+    }
+
+    .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.3);
+    }
+
+    .section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+
+    .entry-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .entry-item {
+      padding: 9px 10px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      background: radial-gradient(circle at top left, rgba(56,189,248,0.16), rgba(15,23,42,0.95));
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
+    }
+
+    .entry-item:hover {
+      border-color: rgba(96, 165, 250, 0.6);
+      transform: translateY(-1px);
+    }
+
+    .entry-item-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: #e5e7eb;
+    }
+
+    .entry-item-meta {
+      font-size: 11px;
+      color: #9ca3af;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .metric-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      color: #9ca3af;
+    }
+
+    .metric-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .metric-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+    }
+
+    .metric-dot.energy { background: #22c55e; }
+    .metric-dot.mood { background: #38bdf8; }
+    .metric-dot.focus { background: #fb923c; }
+
+    .metric-value {
+      font-weight: 500;
+      color: #e5e7eb;
+    }
+
+    .main {
+      flex: 1;
+      padding: 22px 22px 20px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      background:
+        radial-gradient(circle at top right, rgba(56, 189, 248, 0.1), transparent 55%),
+        radial-gradient(circle at 10% 90%, rgba(79, 70, 229, 0.25), rgba(15, 23, 42, 1) 60%);
+    }
+
+    .main-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .main-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .main-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .main-subtitle {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .tag {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(129, 140, 248, 0.7);
+      background: radial-gradient(circle at 0 0, rgba(129,140,248,0.7), rgba(15,23,42,0.96));
+      color: #e5e7eb;
+    }
+
+    .main-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn {
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid transparent;
+      background: rgba(15,23,42,0.95);
+      color: #e5e7eb;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 25px rgba(15,23,42,0.8);
+      border-color: rgba(148, 163, 184, 0.6);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      box-shadow:
+        0 10px 25px rgba(34, 197, 94, 0.6),
+        0 0 0 1px rgba(187, 247, 208, 0.5);
+      color: #022c22;
+      font-weight: 500;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #16a34a, #15803d);
+    }
+
+    .btn-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.7);
+      font-size: 11px;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 16px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .card {
+      border-radius: 18px;
+      padding: 14px 14px 12px 14px;
+      background: radial-gradient(circle at top left, rgba(15,23,42,0.96), rgba(15,23,42,0.98));
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      box-shadow:
+        0 12px 30px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(30, 64, 175, 0.45);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .card-title-main {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .card-title-sub {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
+    .editor-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
+    .editor-chip {
+      padding: 3px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15,23,42,0.9);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .editor-chip-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    .editor {
+      flex: 1;
+      position: relative;
+      min-height: 180px;
+    }
+
+    .editor-textarea {
+      width: 100%;
+      height: 100%;
+      min-height: 180px;
+      padding: 10px 10px 24px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: radial-gradient(circle at top left, rgba(17,24,39,0.98), rgba(15,23,42,1));
+      color: #e5e7eb;
+      font-size: 13px;
+      line-height: 1.5;
+      resize: none;
+      outline: none;
+      box-shadow: inset 0 0 0 1px rgba(15,23,42,1);
+    }
+
+    .editor-textarea::placeholder {
+      color: #6b7280;
+    }
+
+    .editor-footer {
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      bottom: 6px;
+      font-size: 10px;
+      color: #6b7280;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .editor-footer span {
+      pointer-events: auto;
+    }
+
+    .editor-shortcuts {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .editor-kbd {
+      border-radius: 4px;
+      border: 1px solid rgba(107, 114, 128, 0.7);
+      padding: 1px 4px;
+      font-size: 9px;
+      background: rgba(15,23,42,0.95);
+      color: #e5e7eb;
+    }
+
+    .insights {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .insight-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #d1d5db;
+    }
+
+    .insight-label {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .insight-label span:last-child {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
+    .insight-value {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .tone-tag {
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.7);
+      color: #bbf7d0;
+      font-size: 11px;
+    }
+
+    .mood-bar {
+      margin-top: 4px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(31, 41, 55, 0.95);
+      overflow: hidden;
+      display: flex;
+    }
+
+    .mood-bar-fill {
+      width: 52%;
+      background: linear-gradient(90deg, #22c55e, #eab308, #f97316);
+    }
+
+    .section-divider {
+      height: 1px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.4), transparent);
+      margin: 4px 0;
+    }
+
+    .status-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .status-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-badge {
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: rgba(15,23,42,0.9);
+    }
+
+    .status-flag {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #fbbf24, #f97316);
+      box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+    }
+
+    .status-pill {
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: rgba(37, 99, 235, 0.2);
+      border: 1px solid rgba(59, 130, 246, 0.7);
+      font-size: 10px;
+      color: #bfdbfe;
+    }
+
+    .ai-notes {
+      font-size: 11px;
+      color: #9ca3af;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(129, 140, 248, 0.8);
+      color: #e5e7eb;
+    }
+
+    .ai-badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #6366f1;
+    }
+
+    .footer {
+      margin-top: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: #6b7280;
+    }
+
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .footer-chip {
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background: rgba(15,23,42,0.9);
+      font-size: 10px;
+      color: #9ca3af;
+    }
+
+    .footer-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .footer-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    .footer-pill {
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: rgba(15,23,42,0.9);
+      font-size: 10px;
+    }
+
+    .footer-pill span:first-child {
+      color: #9ca3af;
+    }
+
+    .footer-pill span:last-child {
+      color: #e5e7eb;
+    }
+
+    @media (max-width: 780px) {
+      .app {
+        flex-direction: column;
+        border-radius: 16px;
+      }
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 8px;
+      }
+      .main-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .main-actions {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+      .btn, .btn-primary {
+        flex: 1 0 auto;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-icon">J</div>
+        <div class="logo-text">
+          <div class="logo-text-main">Journal Pro</div>
+          <div class="logo-text-sub">Daily Insight Logs</div>
+        </div>
+      </div>
+
+      <div class="today-date">
+        <span>Today · 29 Nov 2025</span>
+        <span class="pill">
+          <span class="pill-dot"></span>
+          <span>On track</span>
+        </span>
+      </div>
+
+      <div>
+        <div class="section-title">Entries</div>
+        <div class="entry-list">
+          <button class="entry-item" type="button">
+            <div class="entry-item-title">Morning focus check-in</div>
+            <div class="entry-item-meta">
+              <span>07:45 AM · 320 words</span>
+              <span>Saved</span>
+            </div>
+          </button>
+          <button class="entry-item" type="button">
+            <div class="entry-item-title">Midday energy reflection</div>
+            <div class="entry-item-meta">
+              <span>01:15 PM · 210 words</span>
+              <span>Draft</span>
+            </div>
+          </button>
+          <button class="entry-item" type="button">
+            <div class="entry-item-title">Evening journal setup</div>
+            <div class="entry-item-meta">
+              <span>09:00 PM · template</span>
+              <span>Template</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">Today’s metrics</div>
+        <div class="metric-list">
+          <div class="metric-row">
+            <div class="metric-label">
+              <span class="metric-dot energy"></span>
+              <span>Energy</span>
+            </div>
+            <span class="metric-value">7 / 10</span>
+          </div>
+          <div class="metric-row">
+            <div class="metric-label">
+              <span class="metric-dot mood"></span>
+              <span>Mood</span>
+            </div>
+            <span class="metric-value">Balanced</span>
+          </div>
+          <div class="metric-row">
+            <div class="metric-label">
+              <span class="metric-dot focus"></span>
+              <span>Focus</span>
+            </div>
+            <span class="metric-value">High</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="main-header">
+        <div class="main-title-wrap">
+          <div class="main-title">
+            <span>Evening reflection entry</span>
+            <span class="tag">Guided by AI</span>
+          </div>
+          <div class="main-subtitle">
+            Capture what mattered today so your future self can see the signal, not the noise.
+          </div>
+        </div>
+        <div class="main-actions">
+          <button class="btn" type="button">
+            <span class="btn-icon">⟳</span>
+            <span>Start fresh</span>
+          </button>
+          <button class="btn-primary" id="saveButton" type="button">
+            <span>Save entry</span>
+          </button>
+        </div>
+      </header>
+
+      <section class="content">
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-title-main">What stood out today?</span>
+              <span class="card-title-sub">
+                Use 3–5 sentences to capture the key moments, shifts, or realizations.
+              </span>
+            </div>
+            <div class="editor-meta">
+              <span class="editor-chip">
+                <span class="editor-chip-dot"></span>
+                <span>Autosaves locally</span>
+              </span>
+              <span>0 words</span>
+            </div>
+          </div>
+
+          <div class="editor">
+            <textarea
+              id="journalText"
+              class="editor-textarea"
+              placeholder="Write about what actually influenced your mood, focus, and energy today. Small details are often where the real patterns hide."
+            ></textarea>
+            <div class="editor-footer">
+              <span>Journal Pro · stored only in this browser</span>
+              <div class="editor-shortcuts">
+                <span class="editor-kbd">Ctrl</span>+
+                <span class="editor-kbd">S</span>
+                <span>to save</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-title-main">AI insights for this entry</span>
+              <span class="card-title-sub">Helps you notice patterns over time.</span>
+            </div>
+          </div>
+
+          <div class="insights">
+            <div class="insight-row">
+              <div class="insight-label">
+                <span>Overall tone</span>
+                <span>How your language reads emotionally.</span>
+              </div>
+              <div class="insight-value">
+                <span class="tone-tag">Grounded · Reflective</span>
+              </div>
+            </div>
+
+            <div class="insight-row">
+              <div class="insight-label">
+                <span>Primary themes</span>
+                <span>Top 3 recurring focuses in this entry.</span>
+              </div>
+              <div class="insight-value">
+                Deep work · Health · Relationships
+              </div>
+            </div>
+
+            <div>
+              <div class="insight-row">
+                <div class="insight-label">
+                  <span>Mood balance</span>
+                  <span>Distribution of positive / neutral / negative phrasing.</span>
+                </div>
+                <div class="insight-value">52% positive language</div>
+              </div>
+              <div class="mood-bar">
+                <div class="mood-bar-fill"></div>
+              </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <div class="status-list">
+              <div class="status-row">
+                <div class="status-left">
+                  <span class="status-badge">Reflection depth</span>
+                  <span>Moderate · some specifics captured</span>
+                </div>
+                <span>Good</span>
+              </div>
+              <div class="status-row">
+                <div class="status-left">
+                  <span class="status-flag">!</span>
+                  <span>1 possible stress pattern flagged</span>
+                </div>
+                <span class="status-pill">Worth watching</span>
+              </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <div class="ai-notes">
+              <span class="ai-badge">
+                <span class="ai-badge-dot"></span>
+                <span>AI assist</span>
+              </span>
+              <span>
+                As you write, this panel can suggest patterns, highlight repeats, and gently nudge
+                you toward what matters most to you.
+              </span>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <footer class="footer">
+        <div class="footer-left">
+          <span class="footer-chip">Local‑only PWA draft</span>
+          <span>Entries sync when you connect a cloud account.</span>
+        </div>
+        <div class="footer-right">
+          <span class="footer-dot"></span>
+          <span class="footer-pill">
+            <span>Status</span>
+            <span>Private · On this device</span>
+          </span>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    // Basic local storage save
+    const textarea = document.getElementById('journalText');
+    const saveButton = document.getElementById('saveButton');
+    const STORAGE_KEY = 'journalPro:eveningEntry';
+
+    function saveEntry() {
+      try {
+        localStorage.setItem(STORAGE_KEY, textarea.value || '');
+      } catch (e) {
+        console.error('Error saving entry', e);
+      }
+    }
+
+    // Load existing value
+    (function loadEntry() {
+      try {
+        const value = localStorage.getItem(STORAGE_KEY);
+        if (value) textarea.value = value;
+      } catch (e) {
+        console.error('Error loading entry', e);
+      }
+    })();
+
+    // Button click
+    saveButton.addEventListener('click', saveEntry);
+
+    // Ctrl+S / Cmd+S
+    document.addEventListener('keydown', (event) => {
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      if ((isMac ? event.metaKey : event.ctrlKey) && event.key.toLowerCase() === 's') {
+        event.preventDefault();
+        saveEntry();
+      }
+    });
+
+    // PWA: register service worker if available
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch((error) => {
+          console.error('Service worker registration failed:', error);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
