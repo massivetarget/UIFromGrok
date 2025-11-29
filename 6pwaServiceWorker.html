@@ -9,15 +9,12 @@
     <title>Journal Pro</title>
 
     <!-- Local Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="all.min.css" />
 
     <!-- PWA manifest -->
      <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#4361ee">
     <link rel="icon" type="image/png" href="/icons/icon-192.png">
-
-    <!-- <link rel="manifest" href="manifest.json" />
-    <meta name="theme-color" content="#4361ee" /> -->
 
     <!-- iOS meta -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -58,7 +55,7 @@
       .container {
         max-width: 1000px;
         margin: 0 auto;
-        padding: 0.5rem;
+        padding: 0.4rem;
       }
       .form-card {
         background: var(--card);
@@ -71,8 +68,8 @@
       .header {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 0.8rem;
-        margin-bottom: 1rem;
+        gap: 2rem;
+        /* margin-bottom: 1rem; */
       }
       @media (min-width: 640px) {
         .header {
@@ -88,7 +85,7 @@
       input,
       select {
         width: 100%;
-        padding: 0.75rem;
+        padding: 0.6rem;
         border: 2px solid var(--border);
         border-radius: 10px;
         font-size: 1rem;
@@ -97,10 +94,9 @@
       }
       .line {
         display: grid;
-        grid-template-columns: 2fr 1fr 1fr 50px;
+        grid-template-columns: 6fr 1fr 1fr px;
         gap: 0.6rem;
         align-items: center;
-        padding: 0.7rem;
         background: rgba(0, 0, 0, 0.03);
         border-radius: 10px;
         margin-bottom: 0.6rem;
@@ -308,7 +304,7 @@
           .catch((err) => console.log("SW failed", err));
       }
 
-      // PWA install
+/*       // PWA install-> now desable to prevent console error.
       let deferredPrompt = null;
       window.addEventListener("beforeinstallprompt", (e) => {
         e.preventDefault();
@@ -316,7 +312,7 @@
         document.getElementById("install-banner").style.display = "block";
       });
 
-      function installPWA() {
+       function installPWA() {
         if (!deferredPrompt) return;
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choice) => {
@@ -326,7 +322,8 @@
           deferredPrompt = null;
           closeBanner();
         });
-      }
+      } 
+*/
 
       function closeBanner() {
         document.getElementById("install-banner").style.display = "none";
@@ -348,44 +345,87 @@
 
       let entries = JSON.parse(localStorage.getItem("journalEntries") || "[]");
 
-      function toggleDark() {
-        document.body.classList.toggle("dark");
-        const isDark = document.body.classList.contains("dark");
-        localStorage.setItem("darkMode", isDark);
+      // Theme helpers: supports following system preference when user hasn't chosen
+      // stored value semantics: localStorage.darkMode === 'true'|'false' means explicit user choice
+      function applyTheme(isDark) {
+        document.body.classList.toggle("dark", !!isDark);
+        const btn = document.getElementById("darkBtn");
+        if (btn) btn.textContent = isDark ? "☀️" : "🌙";
       }
 
-      if (localStorage.getItem("darkMode") === "true") {
-        document.body.classList.add("dark");
+      function getStoredTheme() {
+        const raw = localStorage.getItem("darkMode");
+        if (raw === null) return null; // no explicit preference
+        return raw === "true";
       }
+
+      function setStoredTheme(isDark) {
+        localStorage.setItem("darkMode", String(!!isDark));
+      }
+
+      function toggleDark() {
+        const current = document.body.classList.contains("dark");
+        const next = !current;
+        applyTheme(next);
+        // Save explicit user choice (override system)
+        setStoredTheme(next);
+      }
+
+      // Initialize theme: follow stored preference if present, otherwise follow system
+      (function initTheme() {
+        const stored = getStoredTheme();
+        const prefersDark =
+          window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+        if (stored === null) {
+          applyTheme(prefersDark);
+        } else {
+          applyTheme(stored);
+        }
+
+        // If user has NOT chosen a preference, follow system changes dynamically
+        const mql = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+        if (mql) {
+          const onChange = (e) => {
+            if (getStoredTheme() === null) {
+              applyTheme(e.matches);
+            }
+          };
+          if (typeof mql.addEventListener === "function") {
+            mql.addEventListener("change", onChange);
+          } else if (typeof mql.addListener === "function") {
+            mql.addListener(onChange);
+          }
+        }
+      })();
 
       function addLine(account = "", debit = "", credit = "") {
         const div = document.createElement("div");
         div.className = "line";
         div.innerHTML = `
           <div>
-            <label>Account</label>
-            <select required>
-              ${accounts
-                .map(
-                  (a) =>
-                    `<option value="${a}" ${
-                      a === account ? "selected" : ""
-                    }>${a}</option>`
-                )
-                .join("")}
-            </select>
+              <label>Account</label>
+              <select required>
+                ${accounts
+                  .map(
+                    (a) =>
+                      `<option value="${a}" ${
+                        a === account ? "selected" : ""
+                      }>${a}</option>`
+                  )
+                  .join("")}
+              </select>
+
+              <label>Debit</label>
+              <input type="number" step="0.01" placeholder="Debit" value="${debit}"
+                oninput="updateBalance(); clearOther(this)" />
+
+              <label>Credit</label>
+              <input type="number" step="0.01" placeholder="Credited" value="${credit}"
+                oninput="updateBalance(); clearOther(this)" />
+        
+            <button type="button" class="remove-btn" onclick="this.parentElement.remove(); updateBalance()">×</button>
           </div>
-          <div>
-            <label>Debit</label>
-            <input type="number" step="0.01" placeholder="Debit" value="${debit}"
-              oninput="updateBalance(); clearOther(this)" />
-          </div>
-          <div>
-            <label>Credit</label>
-            <input type="number" step="0.01" placeholder="Credit" value="${credit}"
-              oninput="updateBalance(); clearOther(this)" />
-          </div>
-          <button type="button" class="remove-btn" onclick="this.parentElement.remove(); updateBalance()">×</button>
         `;
         document.getElementById("lines").appendChild(div);
       }
